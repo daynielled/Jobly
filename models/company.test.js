@@ -58,17 +58,47 @@ describe("create", function () {
 
 /************************************** findAll */
 
-describe("findAll", function () {
+describe("findAllWithFilters", function () {
   test("works: no filter", async function () {
-    let companies = await Company.findAll();
+    try{
+      const filters ={};
+      let companies = await Company.findAllWithFilters();
+      expect(companies).toEqual([
+        {
+          handle: "c1",
+          name: "C1",
+          description: "Desc1",
+          numEmployees: 1,
+          logoUrl: "http://c1.img",
+        },
+        {
+          handle: "c2",
+          name: "C2",
+          description: "Desc2",
+          numEmployees: 2,
+          logoUrl: "http://c2.img",
+        },
+        {
+          handle: "c3",
+          name: "C3",
+          description: "Desc3",
+          numEmployees: 3,
+          logoUrl: "http://c3.img",
+        },
+      ]);
+      
+    } catch(error) {
+      console.error("Error in test", error);
+      throw error;
+    }
+ 
+  });
+});
+  
+  test("works: filter by name", async function () {
+    const filters = {name: "C2"};
+    const companies = await Company.findAllWithFilters(filters);
     expect(companies).toEqual([
-      {
-        handle: "c1",
-        name: "C1",
-        description: "Desc1",
-        numEmployees: 1,
-        logoUrl: "http://c1.img",
-      },
       {
         handle: "c2",
         name: "C2",
@@ -76,16 +106,13 @@ describe("findAll", function () {
         numEmployees: 2,
         logoUrl: "http://c2.img",
       },
-      {
-        handle: "c3",
-        name: "C3",
-        description: "Desc3",
-        numEmployees: 3,
-        logoUrl: "http://c3.img",
-      },
     ]);
   });
-});
+
+  test("fails: filter by invalid name", async function () {
+    const filters = {name: "InvalidName"};
+    await expect(Company.findAllWithFilters(filters)).rejects.toThrowError(NotFoundError);
+  });
 
 /************************************** get */
 

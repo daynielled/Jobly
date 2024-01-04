@@ -44,12 +44,41 @@ class Company {
     return company;
   }
 
-  /** Find all companies.
-   *
+  /** Find all companies with optional filters.
+   * 
+   *Filters include : {name, minEmployees, maxEmployees}
+
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
 
-  static async findAll() {
+  static async findAllWithFilters(filters = {}) {
+    const {name, minEmployees, maxEmployees} = filters;
+    
+    let whereClause = "";
+    let values = [];
+
+    if (name) {
+      whereClause += `Lower(name) LIKE LOWER($${values.length + 1}) AND `;
+      values.push(`%${name}%`);
+    }
+
+    if (minEmployees !== undefined){
+      whereClause += `num_employees <= $${values.length + 1} AND `;
+      values.push(minEmployees);
+    }
+
+    if (maxEmployees !== undefined){
+      whereClause += `num_employees <= $${values.length + 1} AND `;
+      values.push(maxEmployees);
+    }
+
+//Remove the trailing 'AND' if there is a filter
+
+    if(whereClause !== ""){
+      whereClause = `WHERE ${whereClause.slice(0, -5)}`;
+    }
+
+
     const companiesRes = await db.query(
           `SELECT handle,
                   name,
@@ -57,8 +86,16 @@ class Company {
                   num_employees AS "numEmployees",
                   logo_url AS "logoUrl"
            FROM companies
-           ORDER BY name`);
-    return companiesRes.rows;
+           ${whereClause}
+           ORDER BY name`,
+           values
+           );
+           
+    const companies = companiesRes.rows;
+    if(companies.length === 0) {
+      throw new NotFoundError('No companies found with the provided filters');
+    }
+    return companies;
   }
 
   /** Given a company handle, return data about company.

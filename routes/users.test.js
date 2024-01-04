@@ -97,7 +97,7 @@ describe("POST /users", function () {
         email: "new@email.com",
         isAdmin: true,
       });
-    expect(resp.statusCode).toEqual(401);
+    expect(resp.statusCode).toEqual(403);
   });
 
   test("bad request if missing data", async function () {
@@ -163,7 +163,7 @@ describe("GET /users", function () {
   test("unauth for anon", async function () {
     const resp = await request(app)
       .get("/users");
-    expect(resp.statusCode).toEqual(401);
+    expect(resp.statusCode).toEqual(403);
   });
 
   test("fails: test next() handler", async function () {
@@ -199,13 +199,13 @@ describe("GET /users/:username", function () {
   test("unauth for anon", async function () {
     const resp = await request(app)
       .get(`/users/u1`);
-    expect(resp.statusCode).toEqual(401);
+    expect(resp.statusCode).toEqual(403);
   });
 
   test("not found if user not found", async function () {
     const resp = await request(app)
       .get(`/users/nope`)
-      .set("authorization", `Bearer ${u1Token}`);
+      .set("authorization", `Bearer ${adminToken}`);
     expect(resp.statusCode).toEqual(404);
   });
 });
@@ -237,7 +237,7 @@ describe("PATCH /users/:username", () => {
       .send({
         firstName: "New",
       });
-    expect(resp.statusCode).toEqual(401);
+    expect(resp.statusCode).toEqual(403);
   });
 
   test("not found if no such user", async function () {
@@ -246,7 +246,7 @@ describe("PATCH /users/:username", () => {
       .send({
         firstName: "Nope",
       })
-      .set("authorization", `Bearer ${u1Token}`);
+      .set("authorization", `Bearer ${adminToken}`);
     expect(resp.statusCode).toEqual(404);
   });
 
@@ -294,13 +294,13 @@ describe("DELETE /users/:username", function () {
   test("unauth for anon", async function () {
     const resp = await request(app)
       .delete(`/users/u1`);
-    expect(resp.statusCode).toEqual(401);
+    expect(resp.statusCode).toEqual(403);
   });
 
   test("not found if user missing", async function () {
     const resp = await request(app)
       .delete(`/users/nope`)
-      .set("authorization", `Bearer ${u1Token}`);
+      .set("authorization", `Bearer ${adminToken}`);
     expect(resp.statusCode).toEqual(404);
   });
 });

@@ -166,6 +166,26 @@ describe("GET /users", function () {
     expect(resp.statusCode).toEqual(403);
   });
 
+  test("unauth for users: cannot get all users", async function () {
+    const resp = await request(app)
+    .get("/users");
+    expect(resp.statusCode).toEqual(403);
+  });
+
+
+  test("unauth for users: cannot get specific user", async function () {
+    const resp = await request(app)
+    .get("/users/u1");
+    expect(resp.statusCode).toEqual(403);
+  });
+
+  test("unauthorized for users: cannot get all users", async function () {
+    const resp = await request(app)
+    .get("/users")
+    .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(403);
+  });
+
   test("fails: test next() handler", async function () {
     // there's no normal failure event which will cause this route to fail ---
     // thus making it hard to test that the error-handler works with it. This
@@ -294,6 +314,13 @@ describe("DELETE /users/:username", function () {
   test("unauth for anon", async function () {
     const resp = await request(app)
       .delete(`/users/u1`);
+    expect(resp.statusCode).toEqual(403);
+  });
+
+  test("unauthorized for users: cannot delete user", async function () {
+    const resp = await request(app)
+      .delete(`/users/u2`)
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(403);
   });
 

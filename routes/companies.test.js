@@ -67,7 +67,7 @@ describe("POST /companies", function () {
 
 describe("GET /companies", function () {
   test("ok for anon", async function () {
-    const resp = await request(app).get("/companies").query({name:"C2", minEmployees: 1, maxEmployees: 3});
+    const resp = await request(app).get("/companies");
     expect(resp.body).toEqual({
       companies:
           [

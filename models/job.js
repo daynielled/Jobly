@@ -76,7 +76,7 @@ class Job {
         }
 
         if (minSalary !== undefined) {
-            whereClause += `salary <= $${values.length + 1} AND `;
+            whereClause += `salary >= $${values.length + 1} AND `;
             values.push(minSalary);
         }
 
@@ -86,7 +86,7 @@ class Job {
         }
 
         if (minEquity !== undefined) {
-            whereClause += `equity <= $${values.length + 1} AND `;
+            whereClause += `equity >= $${values.length + 1} AND `;
             values.push(minEquity);
         }
 

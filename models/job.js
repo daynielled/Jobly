@@ -65,7 +65,7 @@ class Job {
    * Returns [{ id, title, salary, equity, companyHandle }, ...]
    * */
     static async findAllWithFilters(filters = {}) {
-        const { title, minSalary, maxSalary, minEquity, maxEquity, companyHandle } = filters;
+        const { title, minSalary, hasEquity, companyHandle} = filters;
 
         let whereClause = "";
         let values = [];
@@ -80,26 +80,22 @@ class Job {
             values.push(minSalary);
         }
 
-        if (maxSalary !== undefined) {
-            whereClause += `salary <= $${values.length + 1} AND `;
-            values.push(maxSalary);
-        }
 
-        if (minEquity !== undefined) {
-            whereClause += `equity >= $${values.length + 1} AND `;
-            values.push(minEquity);
-        }
-
-        if (maxEquity !== undefined) {
-            whereClause += `equity <= $${values.length + 1} AND `;
-            values.push(maxEquity);
+        if (hasEquity !== undefined) {
+            if (hasEquity){
+                whereClause += `equity > 0 AND `;
+            } else {
+                whereClause += `equity = 0 AND `;
+            }
+           
         }
 
         if (companyHandle) {
             whereClause += `company_handle = $${values.length + 1} AND `;
-            values.push(companiesRes);
+            values.push(companyHandle);
         }
-
+       
+      
         //Remove the trailing 'AND' if there is a filter
 
         if (whereClause !== "") {
@@ -148,7 +144,7 @@ class Job {
         const result = await db.query(querySql, [...values, id]);
         const job = result.rows[0];
     
-        if (!job) throw new NotFoundError(`No jon with ID: ${id}`);
+        if (!job) throw new NotFoundError(`No job with ID: ${id}`);
     
         return job;
       }

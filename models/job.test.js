@@ -60,50 +60,52 @@ describe("create", function () {
 
 /************************************** findAllWithFilters */
 
-// describe("findAllWithFilters", function () {
-//     test("works: no filter", async function () {
-//             const filters = {};
-//             const jobs = await Job.findAllWithFilters();
+describe("findAllWithFilters", function () {
+    test("works: no filter", async function () {
+            const filters = {};
+            const jobs = await Job.findAllWithFilters();
 
-//             expect(jobs.length).toBeGreaterThan(0);
-//             jobs.forEach(job => {
-//                 let equityExpectation;
-//                 if(filters.hasEquity) {
-//                     equityExpectation = expect.any(Boolean);
-//                 }else {
-//                     equityExpectation = expect.any(Number);
-//                 }
+            expect(jobs.length).toBeGreaterThan(0);
+            jobs.forEach(job => {
+                let equityExpectation;
+                if(filters.hasEquity) {
+                    equityExpectation = expect.any(Boolean);
+                }else {
+                    equityExpectation = expect.any(String);
+                }
 
-//                 expect(job).toEqual(expect.objectContaining({
-//                     id: expect.any(Number),
-//                     title: expect.any(String),
-//                     salary: expect.any(Number),
-//                     equity: equityExpectation,
-//                     companyHandle: expect.any(String),
-//                 }));
+                expect(job).toEqual(expect.objectContaining({
+                    id: expect.any(Number),
+                    title: expect.any(String),
+                    salary: expect.any(Number),
+                    equity: equityExpectation,
+                    companyHandle: expect.any(String),
+                }));
 
-//             });
+            });
 
-//         });
-
-
-// test("works: filter by title", async function () {
-//     const filters = { title: "Data Scientist" };
-//     const jobs = await Job.findAllWithFilters(filters);
-
-//     expect(jobs.length).toBeGreaterThan(0);
-//     jobs.forEach(job => {
-//         expect(job.title.toLowerCase()).toContain('scientist');
-//     });
-
-// });
+        });
 
 
+test("works: filter by title", async function () {
+    const filters = { title: "Data Scientist" };
+    const jobs = await Job.findAllWithFilters(filters);
 
-// test("fails: filter by invalid title", async function () {
-//     const filters = { name: "InvalidTitle" };
-//     await expect(Job.findAllWithFilters(filters)).rejects.toThrowError(NotFoundError);
-// });
+    expect(jobs.length).toBeGreaterThan(0);
+    jobs.forEach(job => {
+        expect(job.title.toLowerCase()).toContain('scientist');
+    });
+
+});
+
+
+
+test("fails: filter by invalid title", async function () {
+    const filters = { title: "InvalidTitle" };
+    await expect(Job.findAllWithFilters(filters)).rejects.toThrowError(NotFoundError);
+});
+});
+
 
 describe("update", function () {
     const updateData = {

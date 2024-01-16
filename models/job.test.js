@@ -18,25 +18,33 @@ afterAll(commonAfterAll);
 /************************************** create */
 
 describe("create", function () {
-    const newJob = {
-        title: "Nurse",
-        salary: 100000,
-        equity: "0.01",
-        companyHandle: 'c1',
-    };
-
     test("works", async function () {
+        const newJob = {
+            title: "Nurse",
+            salary: 100000,
+            equity: "0.01",
+            companyHandle: 'c3',
+        };
+
         let job = await Job.create(newJob);
+
         expect(job.id).toEqual(expect.any(Number));
         expect(job.title).toBe("Nurse");
         expect(job.salary).toBe(100000);
         expect(Number(job.equity)).toEqual(0.01);
-        expect(job.companyHandle).toBe("c1");
+        expect(job.companyHandle).toBe("c3");
     });
 
 
 
     test("bad request with dupe", async function () {
+        const newJob = {
+            title: "Nurse",
+            salary: 100000,
+            equity: "0.01",
+            companyHandle: 'c3',
+        };
+
         try {
             await Job.create(newJob);
             await Job.create(newJob);
@@ -102,41 +110,55 @@ describe("update", function () {
         title: "Full Stack Developer",
         salary: 90000,
         equity: 0.02,
+        companyHandle: "c1"
     };
 
     test("works", async function () {
-        let job = await Job.update(38, updateData);
+        const jobIdToUpdate = 1;
+
+        let job = await Job.update(jobIdToUpdate,updateData);
+
         expect(job).toEqual({
+            id: jobIdToUpdate,
             title: "Full Stack Developer",
             salary: 90000,
-            equity: 0.02,
-            companyHandle: "c1",
-        })
+            equity: "0.02",
+            companyHandle: "c1"
+        });
+
         const result = await db.query(
-            `SELECT id, title, salary, equity, company_handle
+            `SELECT id, title, salary, equity, company_handle AS "companyHandle" 
              FROM jobs
-             WHERE id = ${job.id}`
+             WHERE id = ${jobIdToUpdate}`
         );
+
         expect(result.rows[0]).toEqual({
-            id: 1,
+            id: jobIdToUpdate,
             title: "Full Stack Developer",
             salary: 90000,
-            equity: 0.02,
-            company_handle: "c1",
+            equity:"0.02",
+            companyHandle: "c1"
         });
     });
 })
 
 describe("remove", function () {
     test("works", async function () {
-        await Job.remove(1); // Assuming 1 is a valid job ID
+        await Job.remove(3); // Assuming 3 is a valid job ID
         const res = await db.query(
-            "SELECT id FROM jobs WHERE id=1"
+            "SELECT id FROM jobs WHERE id=3"
         );
         expect(res.rows.length).toEqual(0);
     });
 
-    // Add more tests for other cases as needed
+    test("not found if no such job", async function () {
+        try {
+          await Job.remove("5");
+          fail();
+        } catch (err) {
+          expect(err instanceof NotFoundError).toBeTruthy();
+        }
+      });
 });
 
 

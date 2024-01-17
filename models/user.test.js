@@ -215,7 +215,7 @@ describe("remove", function () {
   test("works", async function () {
     await User.remove("u1");
     const res = await db.query(
-        "SELECT * FROM users WHERE username='u1'");
+      "SELECT * FROM users WHERE username='u1'");
     expect(res.rows.length).toEqual(0);
   });
 
@@ -226,5 +226,54 @@ describe("remove", function () {
     } catch (err) {
       expect(err instanceof NotFoundError).toBeTruthy();
     }
+  });
+});
+
+
+/************************************** Applications */
+
+describe("application", function () {
+  test("works for applying for a job", async function () {
+    const jobId =3;
+    try {
+      const result = await User.applyForJob("u1", jobId);
+
+      expect(result).toHaveProperty('appliedJobId');
+      expect(result.appliedJobId).toBe(jobId);
+
+    } catch (err) {
+      throw new Error(`Unexpected error: ${err.message}`);
+    }
+    
+  });
+
+  test("throws error if user has already applied for the job", async function () {
+    try{
+      await User.applyForJob("u1", 1);
+      fail();
+    } catch (err) {
+      expect (err instanceof BadRequestError).toBeTruthy();
+      expect(err.message).toBe(`User 'u1' has already applied for job 1`);
+    }
+  })
+
+  test("throws error if job is not found", async function () {
+    try {
+      await User.applyForJob("u1", 100);
+      fail();
+    } catch(err) {
+      expect (err instanceof NotFoundError).toBeTruthy();
+      expect(err.message).toBe("No job with ID: 100")
+    }
+
+  });
+  
+ 
+
+  test("getAppliedJobs returns the list of applied jobs", async function () {
+    const appliedJobs = await User.getAppliedJobs("u1");
+
+    expect(appliedJobs.length).toBeGreaterThan(0);
+
   });
 });

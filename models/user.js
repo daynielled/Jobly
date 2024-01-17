@@ -10,6 +10,7 @@ const {
 } = require("../expressError");
 
 const { BCRYPT_WORK_FACTOR } = require("../config.js");
+const Job = require("./job.js");
 
 /** Related functions for users. */
 
@@ -206,15 +207,57 @@ class User {
   }
 
   /**Apply for jobs */
+  // static async applyForJob(username, jobId) {
+  //   const job = await Job.get(jobId);
+  //   if(!job) {
+  //     throw new NotFoundError(`No job with ID : ${jobId}`);
+  //   }
+
+  //   const jobApplication = await db.query(
+  //     `INSERT INTO applications (username, job_id)
+  //     VALUES ($1, $2)
+  //     RETURNING job_id AS "appliedJobId"`,
+  //     [username, jobId]
+  //   );
+  //   return jobApplication.rows[0];
+  // }
+
   static async applyForJob(username, jobId) {
-    const jobApplication = await db.query(
-      `INSERT INTO applications (username, job_id)
-      VALUES ($1, $2)
-      RETURNING job_id AS "appliedJobId`,
+    //Check if the job exists
+    const job = await db.query(
+      `SELECT id
+      FROM jobs
+      WHERE id = $1`,
+      [jobId]
+    );
+    if(job.rows.length === 0) {
+      throw new NotFoundError(`No job with ID: ${jobId}`);
+    }
+    
+    // Check if the user has already applied for this job
+    const existingApplication = await db.query(
+      `SELECT job_id
+       FROM applications
+       WHERE username = $1 AND job_id = $2`,
       [username, jobId]
     );
+  
+    if (existingApplication.rows.length > 0) {
+      // User has already applied for this job
+      throw new BadRequestError(`User '${username}' has already applied for job ${jobId}`);
+    }
+  
+    // Insert the new application
+    const jobApplication = await db.query(
+      `INSERT INTO applications (username, job_id)
+       VALUES ($1, $2)
+       RETURNING job_id AS "appliedJobId"`,
+      [username, jobId]
+    );
+  
     return jobApplication.rows[0];
   }
+  
 
 
   /**Get a list of the jobs by ID's the user has appliedd for */

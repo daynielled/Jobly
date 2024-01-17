@@ -204,7 +204,32 @@ class User {
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
   }
+
+  /**Apply for jobs */
+  static async applyForJob(username, jobId) {
+    const jobApplication = await db.query(
+      `INSERT INTO applications (username, job_id)
+      VALUES ($1, $2)
+      RETURNING job_id AS "appliedJobId`,
+      [username, jobId]
+    );
+    return jobApplication.rows[0];
+  }
+
+
+  /**Get a list of the jobs by ID's the user has appliedd for */
+  static async getAppliedJobs(username) {
+    const appliedJobs = await db.query(
+      `SELECT job_id AS "appliedJobId"
+      FROM applications
+      WHERE username = $1`,
+      [username]
+    );
+    return appliedJobs.rows.map(row => row.appliedJobId);
+  }
 }
+
+
 
 
 module.exports = User;

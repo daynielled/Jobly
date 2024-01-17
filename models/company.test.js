@@ -1,5 +1,7 @@
 "use strict";
-
+const request = require('supertest');
+const express = require('express');
+const app = require("../app");
 const db = require("../db.js");
 const { BadRequestError, NotFoundError } = require("../expressError");
 const Company = require("./company.js");
@@ -31,7 +33,7 @@ describe("create", function () {
     expect(company).toEqual(newCompany);
 
     const result = await db.query(
-          `SELECT handle, name, description, num_employees, logo_url
+      `SELECT handle, name, description, num_employees, logo_url
            FROM companies
            WHERE handle = 'new'`);
     expect(result.rows).toEqual([
@@ -60,8 +62,8 @@ describe("create", function () {
 
 describe("findAllWithFilters", function () {
   test("works: no filter", async function () {
-    try{
-      const filters ={};
+    try {
+      const filters = {};
       let companies = await Company.findAllWithFilters();
       expect(companies).toEqual([
         {
@@ -86,48 +88,62 @@ describe("findAllWithFilters", function () {
           logoUrl: "http://c3.img",
         },
       ]);
-      
-    } catch(error) {
+
+    } catch (error) {
       console.error("Error in test", error);
       throw error;
     }
- 
+
   });
 });
-  
-  test("works: filter by name", async function () {
-    const filters = {name: "C2"};
-    const companies = await Company.findAllWithFilters(filters);
-    expect(companies).toEqual([
-      {
-        handle: "c2",
-        name: "C2",
-        description: "Desc2",
-        numEmployees: 2,
-        logoUrl: "http://c2.img",
-      },
-    ]);
-  });
 
-  test("fails: filter by invalid name", async function () {
-    const filters = {name: "InvalidName"};
-    await expect(Company.findAllWithFilters(filters)).rejects.toThrowError(NotFoundError);
-  });
+test("works: filter by name", async function () {
+  const filters = { name: "C2" };
+  const companies = await Company.findAllWithFilters(filters);
+  expect(companies).toEqual([
+    {
+      handle: "c2",
+      name: "C2",
+      description: "Desc2",
+      numEmployees: 2,
+      logoUrl: "http://c2.img",
+    },
+  ]);
+});
+
+test("fails: filter by invalid name", async function () {
+  const filters = { name: "InvalidName" };
+  await expect(Company.findAllWithFilters(filters)).rejects.toThrowError(NotFoundError);
+});
 
 /************************************** get */
+describe('GET /companies/:handle', function () {
+  test('works', async function () {
+    const resp = await request(app)
+      .get(`/companies/c1`);
 
-describe("get", function () {
-  test("works", async function () {
-    let company = await Company.get("c1");
-    expect(company).toEqual({
-      handle: "c1",
-      name: "C1",
-      description: "Desc1",
-      numEmployees: 1,
-      logoUrl: "http://c1.img",
+    expect(resp.statusCode).toBe(200);
+    expect(resp.body).toEqual({
+      company: {
+        handle: 'c1',
+        name: 'C1',
+        description: 'Desc1',
+        numEmployees: 1,
+        logoUrl: 'http://c1.img',
+        jobs: [
+          {
+            id: expect.any(Number),
+            title: 'Software Engineer',
+            salary: 80000,
+            equity: '0.01',
+            companyHandle: 'c1'
+          }
+
+
+        ]
+      }
     });
   });
-
   test("not found if no such company", async function () {
     try {
       await Company.get("nope");
@@ -136,6 +152,7 @@ describe("get", function () {
       expect(err instanceof NotFoundError).toBeTruthy();
     }
   });
+    
 });
 
 /************************************** update */
@@ -156,7 +173,7 @@ describe("update", function () {
     });
 
     const result = await db.query(
-          `SELECT handle, name, description, num_employees, logo_url
+      `SELECT handle, name, description, num_employees, logo_url
            FROM companies
            WHERE handle = 'c1'`);
     expect(result.rows).toEqual([{
@@ -183,7 +200,7 @@ describe("update", function () {
     });
 
     const result = await db.query(
-          `SELECT handle, name, description, num_employees, logo_url
+      `SELECT handle, name, description, num_employees, logo_url
            FROM companies
            WHERE handle = 'c1'`);
     expect(result.rows).toEqual([{
@@ -220,7 +237,7 @@ describe("remove", function () {
   test("works", async function () {
     await Company.remove("c1");
     const res = await db.query(
-        "SELECT handle FROM companies WHERE handle='c1'");
+      "SELECT handle FROM companies WHERE handle='c1'");
     expect(res.rows.length).toEqual(0);
   });
 

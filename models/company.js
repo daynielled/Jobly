@@ -63,7 +63,7 @@ class Company {
     }
 
     if (minEmployees !== undefined){
-      whereClause += `num_employees <= $${values.length + 1} AND `;
+      whereClause += `num_employees >= $${values.length + 1} AND `;
       values.push(minEmployees);
     }
 
@@ -126,6 +126,7 @@ class Company {
 
 
   static async get(handle) {
+    console.log("Handle:", handle);
     const companyRes = await db.query(
           `SELECT c.handle,
                   c.name,
@@ -138,7 +139,7 @@ class Company {
                   j.equity AS job_equity
            FROM companies AS c
            LEFT JOIN jobs AS j ON c.handle = j.company_handle
-           WHERE c.handle = $1`,
+           WHERE c.handle = 'baker-santos'`,
         [handle]);
 
     const company = companyRes.rows[0];
@@ -169,6 +170,8 @@ class Company {
       jobs: jobs,
   };
 }
+
+
   /** Update company data with `data`.
    *
    * This is a "partial update" --- it's fine if data doesn't contain all the

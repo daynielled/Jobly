@@ -46,7 +46,7 @@ describe("POST /companies", function () {
       .post("/companies")
       .send(newCompany)
       .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.statusCode).toEqual(401)
+    expect(resp.statusCode).toEqual(403)
   });
 
   test("bad request with missing data", async function () {
@@ -179,7 +179,7 @@ describe("PATCH /companies/:handle", function () {
       .send({
         name: "C1-new",
       });
-    expect(resp.statusCode).toEqual(401);
+    expect(resp.statusCode).toEqual(403);
   });
 
   test("unauthorized for non-admin users", async function () {
@@ -190,7 +190,7 @@ describe("PATCH /companies/:handle", function () {
       })
       .set("authorization", `Bearer ${u1Token}`);
 
-    expect(resp.statusCode).toEqual(401);
+    expect(resp.statusCode).toEqual(403);
   });
 
   test("not found on no such company", async function () {
@@ -237,14 +237,14 @@ describe("DELETE /companies/:handle", function () {
   test("unauth for anon", async function () {
     const resp = await request(app)
       .delete(`/companies/c1`);
-    expect(resp.statusCode).toEqual(401);
+    expect(resp.statusCode).toEqual(403);
   });
 
   test("unauthorized for non-admin users", async function () {
     const resp = await request(app)
       .delete(`/companies/c1`)
       .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.statusCode).toEqual(401);
+    expect(resp.statusCode).toEqual(403);
   });
 
 

@@ -98,7 +98,7 @@ class Company {
     return companies;
   }
 
-  /** Given a company handle, return data about company.
+  /** Given a company handle, return data about company and information about the jobs associated with that company.
    *
    * Returns { handle, name, description, numEmployees, logoUrl, jobs }
    *   where jobs is [{ id, title, salary, equity, companyHandle }, ...]
@@ -106,25 +106,7 @@ class Company {
    * Throws NotFoundError if not found.
    **/
 
-  // static async get(handle) {
-  //   const companyRes = await db.query(
-  //         `SELECT handle,
-  //                 name,
-  //                 description,
-  //                 num_employees AS "numEmployees",
-  //                 logo_url AS "logoUrl"
-  //          FROM companies
-  //          WHERE handle = $1`,
-  //       [handle]);
-
-  //   const company = companyRes.rows[0];
-
-  //   if (!company) throw new NotFoundError(`No company: ${handle}`);
-
-  //   return company;
-  // }
-
-
+  
   static async get(handle) {
     console.log("Handle:", handle);
     const companyRes = await db.query(
@@ -139,7 +121,7 @@ class Company {
                   j.equity AS job_equity
            FROM companies AS c
            LEFT JOIN jobs AS j ON c.handle = j.company_handle
-           WHERE c.handle = 'baker-santos'`,
+           WHERE c.handle = $1`,
         [handle]);
 
     const company = companyRes.rows[0];

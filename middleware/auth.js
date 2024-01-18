@@ -36,29 +36,25 @@ function authenticateJWT(req, res, next) {
 function ensureLoggedIn(req, res, next) {
   try {
     if (!res.locals.user) throw new UnauthorizedError();
-    if(res.locals.user.isAdmin) {
-      return next();
-    }
-    throw new UnauthorizedError();
-    
+    return next();
   } catch (err) {
     return next(err);
   }
 }
 
-function ensureAdmin(req,res,next) {
-  try{
-    if(!res.locals.user || !res.locals.user.isAdmin) {
+function ensureAdmin(req, res, next) {
+  try {
+    if (!res.locals.user || !res.locals.user.isAdmin) {
       throw new ForbiddenError();
     }
     return next();
-  } catch (err) { 
-    return next (err);
+  } catch (err) {
+    return next(err);
   }
 }
 
-function ensureCorrectUserOrAdmin(req,res,next) {
-  try{
+function ensureCorrectUserOrAdmin(req, res, next) {
+  try {
     if (
       !res.locals.user ||
       (!res.locals.user.isAdmin && res.locals.user.username !== req.params.username)

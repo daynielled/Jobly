@@ -42,6 +42,11 @@ function ensureLoggedIn(req, res, next) {
   }
 }
 
+/** Middleware to use when they must be admin.
+ *
+ * If not, raises Forbidden.
+ */
+
 function ensureAdmin(req, res, next) {
   try {
     if (!res.locals.user || !res.locals.user.isAdmin) {
@@ -53,6 +58,10 @@ function ensureAdmin(req, res, next) {
   }
 }
 
+/** Middleware to use when they must be logged in and admin.
+ *
+ * If not, raises Unauthorized.
+ */
 function ensureCorrectUserOrAdmin(req, res, next) {
   try {
     if (

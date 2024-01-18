@@ -108,11 +108,27 @@ router.patch("/:id", ensureAdmin, async function (req, res, next) {
 
 router.delete("/:id", ensureAdmin, async function (req, res, next) {
   try {
-    await Job.remove(req.params.id);
-    return res.json({ deleted: req.params.id });
+    const jobId = req.params.id;
+    console.log(jobId);
+    //Check if the job exists
+    const job = await Job.get(jobId);
+    if (!job) {
+      return res.status(404).json({
+        error: {
+          message: `No job found with ID: ${jobId}`,
+          status: 404,
+        },
+      });
+    }
+
+    await Job.remove(job);
+
+    return res.status(200).json({ deleted: jobId });
   } catch (err) {
     return next(err);
   }
+  
+  
 });
 
 

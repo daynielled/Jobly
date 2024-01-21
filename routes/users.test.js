@@ -6,6 +6,7 @@ const db = require("../db.js");
 const app = require("../app");
 const User = require("../models/user");
 
+
 const {
   commonBeforeAll,
   commonBeforeEach,
@@ -14,6 +15,7 @@ const {
   u1Token,
   adminToken,
 } = require("./_testCommon");
+const Job = require("../models/job.js");
 
 beforeAll(commonBeforeAll);
 beforeEach(commonBeforeEach);
@@ -33,10 +35,10 @@ describe("POST /users", function () {
         password: "password-new",
         email: "new@email.com",
       });
-      expect(resp.statusCode).toEqual(201);
-      expect(resp.body).toEqual({
-        token: expect.any(String),
-      });
+    expect(resp.statusCode).toEqual(201);
+    expect(resp.body).toEqual({
+      token: expect.any(String),
+    });
   });
   test("works for users: create non-admin", async function () {
     const resp = await request(app)
@@ -126,6 +128,49 @@ describe("POST /users", function () {
   });
 });
 
+/************************************** POST /users (for job application by user or admin) */
+describe('POST /users/:username/jobs/:id', function () {
+  test('applies for a job- user case', async function () {
+    const job = await Job.findAllWithFilters();
+    const jobId = job[0].id;
+
+    const resp = await request(app)
+      .post(`/users/u1/jobs/${jobId}`)
+      .set('authorization', `Bearer ${u1Token}`);
+
+    expect(resp.status).toBe(200);
+    expect(resp.body).toEqual({ applied: jobId })
+
+  });
+
+  test('applies for a job- admin case', async function () {
+    const job = await Job.findAllWithFilters();
+    const jobId = job[0].id;
+
+    const resp = await request(app)
+      .post(`/users/u1/jobs/${jobId}`)
+      .set('authorization', `Bearer ${adminToken}`);
+
+    expect(resp.status).toBe(200);
+    expect(resp.body).toEqual({ applied: jobId })
+  })
+
+  test('should not be able to apply twice to the same job', async function () {
+    const job = await Job.findAllWithFilters();
+    const jobId = job[0].id;
+
+    await request(app)
+      .post(`/users/u1/jobs/${jobId}`)
+      .set('authorization', `Bearer ${u1Token}`);
+
+      const respSecondAttempt = await request(app)
+      .post(`/users/u1/jobs/${jobId}`)
+      .set('authorization', `Bearer ${adminToken}`);
+
+      expect(respSecondAttempt.status).toBe(400);
+
+  })
+})
 /************************************** GET /users */
 
 describe("GET /users", function () {
@@ -168,21 +213,21 @@ describe("GET /users", function () {
 
   test("unauth for users: cannot get all users", async function () {
     const resp = await request(app)
-    .get("/users");
+      .get("/users");
     expect(resp.statusCode).toEqual(403);
   });
 
 
   test("unauth for users: cannot get specific user", async function () {
     const resp = await request(app)
-    .get("/users/u1");
+      .get("/users/u1");
     expect(resp.statusCode).toEqual(403);
   });
 
   test("unauthorized for users: cannot get all users", async function () {
     const resp = await request(app)
-    .get("/users")
-    .set("authorization", `Bearer ${u1Token}`);
+      .get("/users")
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(403);
   });
 

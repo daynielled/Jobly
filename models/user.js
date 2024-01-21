@@ -206,21 +206,8 @@ class User {
     if (!user) throw new NotFoundError(`No user: ${username}`);
   }
 
-  /**Apply for jobs */
-  // static async applyForJob(username, jobId) {
-  //   const job = await Job.get(jobId);
-  //   if(!job) {
-  //     throw new NotFoundError(`No job with ID : ${jobId}`);
-  //   }
-
-  //   const jobApplication = await db.query(
-  //     `INSERT INTO applications (username, job_id)
-  //     VALUES ($1, $2)
-  //     RETURNING job_id AS "appliedJobId"`,
-  //     [username, jobId]
-  //   );
-  //   return jobApplication.rows[0];
-  // }
+ 
+ /** Apply for a job */
 
   static async applyForJob(username, jobId) {
     //Check if the job exists

@@ -121,6 +121,20 @@ describe('GET /jobs', function () {
         });
     })
 
+    test('returns filtered jobs', async function () {
+        const resp = await request(app)
+        .get('/jobs')
+        .query({
+            title: 'Engineer',
+            minSalary:80000,
+            hasEquity: true,
+        });
+
+        expect(resp.status).toBe(200);
+        expect(resp.body).toHaveProperty('jobs');
+        expect(resp.body.jobs).toBeInstanceOf(Array);
+    })
+
 })
 
 
@@ -167,6 +181,7 @@ describe('GET /jobs/:id', function () {
         });
     });
 });
+
 
 /************************************** PATCH /jobs */
 async function updateJobById(jobIdToUpdate, updatedData, adminToken) {

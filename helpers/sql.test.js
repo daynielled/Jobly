@@ -9,6 +9,7 @@ const {
     commonAfterEach,
     commonAfterAll,
     u1Token,
+    adminToken,
 } = require("../routes/_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -21,7 +22,7 @@ describe('PATCH /companies/:handle', function () {
     test('works: basic case', async function () {
         const resp = await request(app)
             .patch(`/companies/c1`)
-            .set("authorization", `Bearer ${u1Token}`)
+            .set("authorization", `Bearer ${adminToken}`)
             .send({
                 name: "New Name",
                 numEmployees: 100

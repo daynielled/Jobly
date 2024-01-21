@@ -12,7 +12,7 @@
       "type": "integer"
     },
     "equity": {
-      "type": "numeric",
+      "type": "decimal",
       "minimum": 0
     },
     "companyHandle": {

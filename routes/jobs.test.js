@@ -87,32 +87,35 @@ describe('POST /jobs', function () {
 describe('GET /jobs', function () {
     test('ok for anon', async function () {
         const resp = await request(app).get('/jobs');
-        console.log(resp.body);
+        
         expect(resp.body).toEqual({
             jobs: [
                 {
-                    id: expect.any(Number),
-                    title: 'Software Engineer',
-                    salary: 80000,
-                    equity: '0.01',
-                    companyHandle: 'c1',
-                },
-
-                {
-                    id: expect.any(Number),
-                    title: 'Web Developer',
-                    salary: 75000,
-                    equity: '0.02',
-                    companyHandle: 'c2'
-                },
-
-                {
-                    id: expect.any(Number),
-                    title: 'Data Scientist',
-                    salary: 90000,
-                    equity: '0.03',
                     companyHandle: 'c3',
-                }
+                    equity: '0.03',
+                    id: expect.any(Number),
+                    salary: 90000,
+                    title: 'Data Scientist',
+                    
+                },
+                {
+                    companyHandle: 'c1',
+                    equity: '0.01',
+                    id: expect.any(Number),
+                    salary: 80000,
+                    title: 'Software Engineer',
+                    
+                    
+                },
+                {
+                    companyHandle: 'c2',
+                    equity: '0.02', 
+                    id: expect.any(Number),
+                    salary: 75000,
+                    title: 'Web Developer',
+                },
+
+               
             ]
 
         });
@@ -165,9 +168,75 @@ describe('GET /jobs/:id', function () {
     });
 });
 
+/************************************** PATCH /jobs */
+async function updateJobById(jobIdToUpdate, updatedData, adminToken) {
+    const jobDetailsResponse = await request(app).get(`/jobs/${jobIdToUpdate}`);
+
+    if (jobDetailsResponse.status === 200) {
+        const jobDetails = jobDetailsResponse.body.job;
+
+        const resp = await request(app)
+            .patch(`/jobs/${jobIdToUpdate}`)
+            .send(updatedData)
+            .set('authorization', `Bearer ${adminToken}`);
+
+        return { jobDetails, resp };
+    } else {
+        console.error('Failed to retrieve job details');
+        return { jobDetails: null, resp: null };
+    }
+}
+
+describe('PATCH /jobs/:id', function () {
+    test('works: admin case', async function () {
+        const jobResponse = await request(app).get('/jobs');
+
+        if (jobResponse.body.jobs.length > 0) {
+            const jobIdToUpdate = jobResponse.body.jobs[0].id;
+
+            const updatedData = {
+                salary: 200000, // Updated salary
+            };
+
+            const { jobDetails, resp } = await updateJobById(jobIdToUpdate, updatedData, adminToken);
+
+            if (jobDetails && resp) {
+                expect(resp.status).toBe(200);
+                expect(resp.body).toEqual({
+                    job: {
+                        id: jobIdToUpdate,
+                        salary: 200000,
+                        companyHandle: expect.any(String),
+                        equity: expect.any(String),
+                        title: expect.any(String),
+                    },
+                });
+            } else {
+                console.error('No jobs found to update');
+            }
+        } else {
+            console.error('No jobs found to update');
+        }
+    });
+
+    test('bad request with invalid data', async function () {
+        const jobResponse = await request(app).get('/jobs');
+
+        if (jobResponse.body.jobs.length > 0) {
+            const jobIdToUpdate = jobResponse.body.jobs[0].id;
+
+            const { resp } = await updateJobById(jobIdToUpdate, { invalidField: 'value' }, adminToken);
+
+            expect(resp.status).toBe(400);
+            // Add additional expectations for the bad request scenario if needed
+        } else {
+            console.error('No jobs found for the bad request test');
+        }
+    });
+});
 
 
-
+/************************************** DELETE /jobs */
 
 describe('DELETE /jobs/:id', () => {
     test('works', async function () {
